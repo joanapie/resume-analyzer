@@ -11,7 +11,7 @@ function run(cmd, args, cwd, label, color) {
 
 const root = new URL('..', import.meta.url).pathname
 
-run('node', ['--watch', 'src/index.js'], root,        'backend', '36')
-run('npm',  ['run', 'dev'],             root+'/client', 'frontend', '35')
+run('node', ['--watch', 'backend/index.js'], root, 'backend', '36')
+run('npm', ['run', 'dev'], root+'/client', 'frontend', '35')
 
 process.on('SIGINT', () => process.exit(0))

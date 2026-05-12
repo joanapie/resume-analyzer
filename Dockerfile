@@ -17,8 +17,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 # Copy backend source
-COPY src/ ./src/
-COPY prompts/ ./prompts/
+COPY backend/ ./backend/
 
 # Copy built frontend from stage 1
 COPY --from=frontend-builder /app/client/dist ./client/dist
@@ -29,4 +28,4 @@ ENV PORT=8080
 
 EXPOSE 8080
 
-CMD ["node", "src/index.js"]
+CMD ["node", "backend/index.js"]

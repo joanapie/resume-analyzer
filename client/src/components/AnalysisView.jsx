@@ -99,7 +99,7 @@ function ATSCard({ atsAnalysis }) {
   return (
     <Card>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <SectionTitle>🤖 ATS Compatibility</SectionTitle>
+        <SectionTitle>ATS Compatibility</SectionTitle>
         <span style={{ fontSize: 22, fontWeight: 600, color }}>{score}/100</span>
       </div>
       <div style={{ height: 6, background: 'var(--bg-tertiary)', borderRadius: 3, overflow: 'hidden', marginBottom: 20 }}>
@@ -192,10 +192,9 @@ export function JDResult({ data }) {
           </div>
           <div style={{ flex: 1, minWidth: 240 }}>
             <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 20, lineHeight: 1.7 }}>{summary}</p>
-            <ScoreBar label="Skill match"       score={scoreDetail.skillMatch}       max={35} />
-            <ScoreBar label="Experience match"  score={scoreDetail.experienceMatch}  max={30} />
-            <ScoreBar label="Achievement match" score={scoreDetail.achievementMatch} max={20} />
-            <ScoreBar label="Culture fit"       score={scoreDetail.cultureFit}       max={15} />
+            <ScoreBar label="Skill match"       score={scoreDetail.skillMatch}       max={50} />
+            <ScoreBar label="Experience match"  score={scoreDetail.experienceMatch}  max={40} />
+            <ScoreBar label="Culture fit"       score={scoreDetail.cultureFit}       max={10} />
           </div>
         </div>
       </Card>

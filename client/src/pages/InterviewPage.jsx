@@ -42,7 +42,7 @@ function QuestionCard({ q, index, isActive, onSelect }) {
         <Badge label={q.difficulty} style={{ color: diff.color, background: 'transparent', border: `0.5px solid ${diff.color}` }} />
       </div>
       <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5, margin: 0 }}>
-        {q.question.length > 80 ? q.question.slice(0, 80) + '...' : q.question}
+        {q.question.length > 100 ? q.question.slice(0, 100) + '...' : q.question}
       </p>
     </button>
   )
@@ -232,7 +232,7 @@ export default function InterviewPage() {
 
       <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
         {/* Left: question list */}
-        <div style={{ width: 240, flexShrink: 0 }}>
+        <div style={{ width: 300, flexShrink: 0 }}>
           <p style={{ fontSize: 12, color: 'var(--text-hint)', marginBottom: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Questions
           </p>

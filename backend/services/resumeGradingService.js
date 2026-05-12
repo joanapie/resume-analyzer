@@ -5,9 +5,13 @@ import path from 'path'
 import 'dotenv/config'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const PROMPTS_DIR = path.resolve(__dirname, '../../prompts')
+const PROMPTS_DIR = path.resolve(__dirname, '../prompts')
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+let _client = null
+function getClient() {
+  if (!_client) _client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  return _client
+}
 
 export async function analyzeResume(resumeText) {
   const [systemPrompt, userPromptTemplate] = await Promise.all([
@@ -19,7 +23,7 @@ export async function analyzeResume(resumeText) {
 
   console.log(`[GradingService] Starting AI analysis, text length: ${resumeText.length}`)
 
-  const response = await client.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model: 'gpt-4o',
     messages: [
       { role: 'system', content: systemPrompt },
@@ -56,7 +60,7 @@ export async function analyzeResumeWithJD(resumeText, jobDescription) {
 
   console.log(`[GradingService] Starting JD match analysis`)
 
-  const response = await client.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model: 'gpt-4o',
     messages: [
       { role: 'system', content: systemPrompt },

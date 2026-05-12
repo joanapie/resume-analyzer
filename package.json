@@ -2,11 +2,11 @@
   "name": "resume-analyzer",
   "version": "1.0.0",
   "description": "Resume Analyzer - Full Stack",
-  "main": "src/index.js",
+  "main": "backend/index.js",
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev.js",
-    "start": "node src/index.js",
+    "start": "node backend/index.js",
     "build": "npm install --prefix client && npm run build --prefix client",
     "install:all": "npm install && npm install --prefix client",
     "test": "node --experimental-vm-modules node_modules/.bin/jest --forceExit",

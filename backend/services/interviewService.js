@@ -5,9 +5,13 @@ import path from 'path';
 import 'dotenv/config';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PROMPTS_DIR = path.resolve(__dirname, '../../prompts');
+const PROMPTS_DIR = path.resolve(__dirname, '../prompts');
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _client = null
+function getClient() {
+  if (!_client) _client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  return _client
+};
 
 /**
  * Generate interview questions based on JD + resume text
@@ -27,7 +31,7 @@ ${resumeText}
 
   console.log('[InterviewService] Generating interview questions');
 
-  const response = await client.chat.completions.create({
+  const response = await getClient().chat.completions.create({
     model: 'gpt-4o',
     messages: [
       { role: 'system', content: systemPrompt },
@@ -65,7 +69,7 @@ ${answer}
 
   console.log('[InterviewService] Streaming answer evaluation');
 
-  const stream = await client.chat.completions.create({
+  const stream = await getClient().chat.completions.create({
     model: 'gpt-4o',
     messages: [
       { role: 'system', content: systemPrompt },

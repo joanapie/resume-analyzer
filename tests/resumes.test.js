@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { createApp } from '../src/index.js';
+import { createApp } from '../backend/index.js';
 import { jest } from '@jest/globals';
 import jwt from 'jsonwebtoken';
 

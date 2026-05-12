@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { createApp } from '../src/index.js';
+import { createApp } from '../backend/index.js';
 
 // Mock DB and Redis so tests don't need real services
 import { jest } from '@jest/globals';

@@ -2,15 +2,15 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 const STATUS_MAP = {
-  PENDING:    { label: 'Queued',    bg: 'var(--bg-tertiary)', color: 'var(--text-hint)' },
-  PROCESSING: { label: 'Analyzing', bg: 'var(--accent-bg)',   color: 'var(--accent-text)' },
-  COMPLETED:  { label: 'Completed', bg: 'var(--success-bg)',  color: 'var(--success-text)' },
-  FAILED:     { label: 'Failed',    bg: 'var(--danger-bg)',   color: 'var(--danger-text)' },
+  PENDING: { label: 'Queued', bg: 'var(--bg-tertiary)', color: 'var(--text-hint)' },
+  PROCESSING: { label: 'Analyzing', bg: 'var(--accent-bg)', color: 'var(--accent-text)' },
+  COMPLETED: { label: 'Completed', bg: 'var(--success-bg)', color: 'var(--success-text)' },
+  FAILED: { label: 'Failed', bg: 'var(--danger-bg)', color: 'var(--danger-text)' },
 }
 
 const MODE_MAP = {
   resume: { label: 'Resume Review', bg: 'var(--bg-tertiary)', color: 'var(--text-muted)' },
-  jd:     { label: 'JD Match',      bg: 'var(--accent-bg)',   color: 'var(--accent-text)' },
+  jd: { label: 'JD Match', bg: 'var(--accent-bg)', color: 'var(--accent-text)' },
 }
 
 function StatusBadge({ status }) {
@@ -32,13 +32,29 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+
   useEffect(() => {
     const token = localStorage.getItem('token')
-    fetch('/api/resumes', { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(data => { setList(data); setLoading(false) })
-      .catch(err => { setError(err.message); setLoading(false) })
-  }, [])
+
+    function fetchList() {
+      fetch('/api/resumes', { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then(data => { setList(data); setLoading(false) })
+        .catch(err => { setError(err.message); setLoading(false) })
+    }
+
+    fetchList()
+
+    // Auto-refresh if any resume is still analyzing
+    const timer = setInterval(() => {
+      const hasAnalyzing = list.some(
+        item => item.status === 'PENDING' || item.status === 'PROCESSING'
+      )
+      if (hasAnalyzing) fetchList()
+    }, 3000)
+
+    return () => clearInterval(timer)
+  }, [list.length])
 
   if (loading) return <div style={{ textAlign: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>Loading...</div>
   if (error) return <div style={{ padding: '16px', borderRadius: 'var(--radius-md)', background: 'var(--danger-bg)', color: 'var(--danger-text)' }}>{error}</div>
