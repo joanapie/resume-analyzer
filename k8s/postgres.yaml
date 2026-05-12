@@ -29,6 +29,8 @@ spec:
                 secretKeyRef:
                   name: app-secrets
                   key: DB_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           ports:
             - containerPort: 5432
           volumeMounts:
