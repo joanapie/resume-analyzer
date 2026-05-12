@@ -1,62 +1,54 @@
-import { useState, useEffect, useRef } from 'react'
+import { WebSocketServer } from 'ws';
 
-export function useWebSocket(resumeId) {
-  const [status, setStatus] = useState('PENDING')
-  const [data, setData] = useState(null)
-  const [error, setError] = useState(null)
-  const [queuePosition, setQueuePosition] = useState(null)
-  const wsRef = useRef(null)
+// Map of resumeId -> Set of WebSocket clients
+const subscribers = new Map();
 
-  useEffect(() => {
-    if (!resumeId) return
+let wss = null;
 
-    const token = localStorage.getItem('token')
+export function initWebSocket(server) {
+  wss = new WebSocketServer({ server, path: '/ws' });
 
-    fetch(`/api/resumes/${resumeId}/status`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(r => r.json())
-      .then(json => {
-        if (json.status === 'COMPLETED') {
-          setStatus('COMPLETED')
-          setData(json.analysis)
-          return
-        }
-        if (json.status === 'FAILED') {
-          setStatus('FAILED')
-          setError(json.error)
-          return
-        }
-        if (json.queuePosition) setQueuePosition(json.queuePosition)
+  wss.on('connection', (ws, req) => {
+    // Extract resumeId from URL: /ws?resumeId=123
+    const url = new URL(req.url, 'http://localhost');
+    const resumeId = url.searchParams.get('resumeId');
 
-        // Use current host for WebSocket - works in both dev and production
-        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
-        const host = window.location.host  // e.g. localhost:5173 or 34.x.x.x
-        const ws = new WebSocket(`${protocol}://${host}/ws?resumeId=${resumeId}`)
-        wsRef.current = ws
-
-        ws.onmessage = (event) => {
-          const msg = JSON.parse(event.data)
-          setStatus(msg.status)
-          if (msg.status === 'COMPLETED') {
-            setData(msg.analysis)
-            ws.close()
-          } else if (msg.status === 'FAILED') {
-            setError(msg.error || 'Analysis failed')
-            ws.close()
-          } else if (msg.queuePosition) {
-            setQueuePosition(msg.queuePosition)
-          }
-        }
-
-        ws.onerror = () => setError('Connection error, please refresh')
-      })
-      .catch(() => setError('Failed to fetch status'))
-
-    return () => {
-      if (wsRef.current) wsRef.current.close()
+    if (!resumeId) {
+      ws.close(1008, 'resumeId required');
+      return;
     }
-  }, [resumeId])
 
-  return { status, data, error, queuePosition }
+    // Register subscriber
+    if (!subscribers.has(resumeId)) {
+      subscribers.set(resumeId, new Set());
+    }
+    subscribers.get(resumeId).add(ws);
+    console.log(`[WS] Client subscribed to resumeId=${resumeId}`);
+
+    ws.on('close', () => {
+      const subs = subscribers.get(resumeId);
+      if (subs) {
+        subs.delete(ws);
+        if (subs.size === 0) subscribers.delete(resumeId);
+      }
+      console.log(`[WS] Client unsubscribed from resumeId=${resumeId}`);
+    });
+
+    ws.on('error', () => {});
+  });
+
+  console.log('[WS] WebSocket server ready at /ws');
+}
+
+// Called by streamConsumer when analysis status changes
+export function notifyClients(resumeId, payload) {
+  const subs = subscribers.get(String(resumeId));
+  if (!subs || subs.size === 0) return;
+
+  const msg = JSON.stringify(payload);
+  for (const ws of subs) {
+    if (ws.readyState === 1) { // OPEN
+      ws.send(msg);
+    }
+  }
 }

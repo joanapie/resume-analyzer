@@ -10,8 +10,8 @@ export function useWebSocket(resumeId) {
   useEffect(() => {
     if (!resumeId) return
 
-    // First do a quick HTTP check in case already done
     const token = localStorage.getItem('token')
+
     fetch(`/api/resumes/${resumeId}/status`, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -20,7 +20,7 @@ export function useWebSocket(resumeId) {
         if (json.status === 'COMPLETED') {
           setStatus('COMPLETED')
           setData(json.analysis)
-          return // No need for WS
+          return
         }
         if (json.status === 'FAILED') {
           setStatus('FAILED')
@@ -29,9 +29,10 @@ export function useWebSocket(resumeId) {
         }
         if (json.queuePosition) setQueuePosition(json.queuePosition)
 
-        // Open WebSocket for live updates
+        // Use current host for WebSocket - works in both dev and production
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
-        const ws = new WebSocket(`${protocol}://localhost:8080/ws?resumeId=${resumeId}`)
+        const host = window.location.host  // e.g. localhost:5173 or 34.x.x.x
+        const ws = new WebSocket(`${protocol}://${host}/ws?resumeId=${resumeId}`)
         wsRef.current = ws
 
         ws.onmessage = (event) => {
